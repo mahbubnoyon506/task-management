@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum TaskStatus {
+  PENDING
+  PROCESSING
+  DONE
+}
+
+enum AuditAction {
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_DELETED
+  TASK_STATUS_CHANGED
+  TASK_ASSIGNED
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  name         String
+  role         Role       @default(USER)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  assignedTasks Task[]     @relation("AssignedTasks")
+  createdTasks  Task[]     @relation("CreatedTasks")
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+model Task {
+  id           String     @id @default(uuid())
+  title        String
+  description  String?
+  status       TaskStatus @default(PENDING)
+  assignedToId String?    @map("assigned_to_id")
+  createdById  String     @map("created_by_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  assignedTo   User?      @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy    User       @relation("CreatedTasks", fields: [createdById], references: [id])
+  auditLogs    AuditLog[]
+
+  @@map("tasks")
+}
+
+model AuditLog {
+  id             String      @id @default(uuid())
+  actorId        String      @map("actor_id")
+  actionType     AuditAction @map("action_type")
+  targetTaskId   String?     @map("target_task_id")
+  beforeSnapshot Json?       @map("before_snapshot")
+  afterSnapshot  Json?       @map("after_snapshot")
+  createdAt      DateTime    @default(now()) @map("created_at")
+
+  actor      User  @relation(fields: [actorId], references: [id])
+  targetTask Task? @relation(fields: [targetTaskId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}

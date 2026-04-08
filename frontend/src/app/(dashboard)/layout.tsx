@@ -1,21 +1,31 @@
-'use client';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
-import { Sidebar } from '@/components/ui/sidebar';
-import { Loader2 } from 'lucide-react';
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
+import { Sidebar } from "@/components/ui/sidebar";
+import { Loader2 } from "lucide-react";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
-  const { user, accessToken } = useAuthStore();
+  const { user } = useAuthStore();
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    if (!accessToken || !user) {
-      router.replace('/login');
-    }
-  }, [accessToken, user, router]);
+    setIsHydrated(true);
+  }, []);
 
-  if (!accessToken || !user) {
+  useEffect(() => {
+    if (!isHydrated) return;
+    if (user === null) {
+      router.replace("/login");
+    }
+  }, [isHydrated, user, router]);
+
+  if (!isHydrated || user === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />

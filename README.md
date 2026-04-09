@@ -40,7 +40,7 @@ unzip task-management.zip
 cd task-management
 
 # Or if cloned from GitHub:
-git clone <repo-url>
+git clone [<repo-url>](https://github.com/mahbubnoyon506/task-management)
 cd task-management
 ```
 
@@ -204,3 +204,4 @@ FRONTEND_URL="http://localhost:3000"  # CORS origin
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000/api
 ```
+### [Live URL](https://task-management-zeta-lime.vercel.app)
